@@ -22,7 +22,7 @@ if (uploaded_zip is not None):
     doc=filetypes[2]
     print("-------------------------------------------------------------")
 
-    directory=f"extracted\{folder_name}"
+    directory=f"extracted/{folder_name}"
 
     doc_to_docx(files=doc,content_path=directory)
 
