@@ -24,27 +24,13 @@ def identify_filetypes(folder_path):
 
     return [pdf_files,docx_files,doc_files]
 
-def pdf_to_docx(files,content_path):
-    for pdf_file in files:
-        file_name=os.path.splitext(pdf_file)[0]
-        docx_name=file_name + ".docx"
-
-        pdf_path=f"{content_path}/{pdf_file}"
-        docx_path=f"formatted/{docx_name}"
-        # Initialize Converter object
-        cv = Converter(pdf_path)
-        # Convert the PDF to DOCX
-        cv.convert(docx_path, start=0, end=None)
-        # Close the Converter object
-        cv.close()
-
 def doc_to_docx(files,content_path):
     for doc_file in files:
         file_name=os.path.splitext(doc_file)[0]
         docx_name=file_name + ".docx"
 
-        doc_path=f"{content_path}/{doc_file}"
-        docx_path=f"{content_path}/{docx_name}"
+        doc_path = os.path.join(content_path, doc_file)
+        docx_path = os.path.join(content_path, docx_name)
 
         doc = aw.Document(doc_path)
         doc.save(docx_path)
