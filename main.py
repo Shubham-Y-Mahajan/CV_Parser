@@ -1,14 +1,16 @@
 import zipfile
 import os
 import streamlit as st
-from backend import identify_filetypes,pdf_to_docx,extract_data,excel_writer,doc_to_docx,section_extractor,\
+from backend import identify_filetypes,pdf_to_docx,excel_writer,doc_to_docx,section_extractor,\
     extract_text_from_pdf,extract_text_from_docx
-import xlsxwriter
 
-st.title("CV data extractor")
+
+st.title("CV Data Extractor")
+st.info("Developed By - Shubham Yogesh Mahajan | +91 8879466601 |shubhamy@iitbhilai.ac.in")
 uploaded_zip = st.file_uploader('XML File', type="zip",accept_multiple_files=False)
 if (uploaded_zip is not None):
-    #print(uploaded_zip)
+
+
     zf = zipfile.ZipFile(uploaded_zip)
     zf.extractall(path="extracted")
 
@@ -37,13 +39,17 @@ if (uploaded_zip is not None):
         else:
             text=""
 
-        data=section_extractor(text=text)
+        data=section_extractor(text=text,filename=filename)
         print("Loading.....")
         excel_data.append(data)
 
 
     excel_writer(data=excel_data)
+
     print("complete")
+    with open("Report.xlsx", 'rb') as my_file:
+        st.download_button(label='Download Output.xlsx', data=my_file, file_name='Output.xlsx',
+                           mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
 
 

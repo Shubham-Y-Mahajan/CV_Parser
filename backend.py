@@ -1,6 +1,4 @@
 import os
-
-import pythoncom
 from pdf2docx import Converter
 from docx import Document
 import re
@@ -40,7 +38,6 @@ def pdf_to_docx(files,content_path):
         # Close the Converter object
         cv.close()
 
-
 def doc_to_docx(files,content_path):
     for doc_file in files:
         file_name=os.path.splitext(doc_file)[0]
@@ -53,29 +50,12 @@ def doc_to_docx(files,content_path):
         doc.save(docx_path)
         os.remove(doc_path)
 
-
-
-
-
-# Function to extract text from DOCX
 def extract_text_from_docx(docx_path):
     doc = Document(docx_path)
     text = ""
     for paragraph in doc.paragraphs:
         text += paragraph.text + "\n"
     return text
-
-def extract_text_from_doc(doc_file_path):
-
-    try:
-        doc = Document(doc_file_path)
-        text = ""
-        for paragraph in doc.paragraphs:
-            text += paragraph.text + "\n"
-        return text
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return None
 
 
 def extract_text_from_pdf(pdf_path):
@@ -85,17 +65,7 @@ def extract_text_from_pdf(pdf_path):
         for page in pdf_reader.pages:
             text += page.extract_text()
     return text
-def extract_section(text, section_heading):
-    pattern = re.compile(r'(?i)' + re.escape(section_heading) + r'\s*\n')
-    start_match = pattern.search(text)
-    if start_match:
-        start_index = start_match.end()
-        next_heading_match = pattern.search(text[start_match.end():])
-        end_index = next_heading_match.start() if next_heading_match else len(text)
-        section_text = text[start_index:end_index].strip()
-        return section_text
-    else:
-        return None
+
 
 def extract_text_between_words(text, word1, word2):
     pattern = re.compile(r'{}(.*?){}'.format(re.escape(word1), re.escape(word2)),re.DOTALL)
@@ -105,31 +75,72 @@ def extract_text_between_words(text, word1, word2):
     else:
         return None
 
-def section_extractor(text):
+
+def extract_emails_old(text):
+    # Define the regular expression pattern for email addresses
+    pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+
+    # Find all email addresses in the text using the pattern
+    emails = re.findall(pattern, text)
+
+    return emails
+
+def extract_emails(text):
+    pattern = r'\b[\w.\d]*@\w+(?:\.\w+)*\b'
+    emails = re.findall(pattern, text)
+    return emails
+def extract_phone_numbers(text):
+    # Define the regular expression pattern for phone numbers
+    pattern = r'\b(?:\+?\d{2}-)?(?:\d{3}[-\s]?\d{3}[-\s]?\d{4}|\d{5}[-\s]?\d{5})\b'
+
+    # Find all phone numbers in the text using the pattern
+    phone_numbers = re.findall(pattern, text)
+
+    return phone_numbers
+def section_extractor(text,filename):
     headings = [
         'Personal Information',
         'Objective',
         'Work History',
         'Education',
         'Work Experience',
+        'Working Experience',
         'Professional Experience',
         'Skills',
         'Certifications',
-        'Certificates'
+        'Certificates',
         'Projects',
         'Publications',
         'Awards',
-        'Employment History'
+        'Employment History',
         'Professional Affiliations',
         'References',
         'Languages',
-        'Achievements',
+        'Achievement',
         'Academic Credentials',
+        'Academic Qualification',
+        'Professional Qualifications',
         'Profile',
-        'Details',
         'Personal Details',
+        'Academic Details',
+        'Soft Skills',
+        'Personal Skills',
+        'Software Skills',
+        'Strengths',
+        'Tool Stack',
+        'Hobbies',
+        'Interests',
+        'Computer Proficiency',
+        'Core Competencies',
+        'Internship',
         'Work Summary',
-        'Desired Job Details'
+        'Desired Job Details',
+        'Professional Interaction',
+        'Professional Summary',
+        'Summary',
+        'Educational Details',
+        'Details'
+
 
     ]
 
@@ -167,6 +178,18 @@ def section_extractor(text):
     "------------------------------------------------------------------------------------------------------"
     extracted_data=[]
 
+    base_name, extension = os.path.splitext(filename)
+
+    phone_numbers=extract_phone_numbers(text=text)
+    phone_numbers_str=" ,".join(phone_numbers)
+
+    emails=extract_emails(text=text)
+    emails_str=" ,".join(emails)
+
+    extracted_data.append(["Name",base_name])
+    extracted_data.append(["Contact Number",phone_numbers_str])
+    extracted_data.append(["Email",emails_str])
+
     for section in sections_present:
 
         min_data=None
@@ -192,48 +215,11 @@ def section_extractor(text):
 
         extracted_data.append([section,min_data])
 
-    for item in extracted_data:
+    """for item in extracted_data:
         print(item[0])
-        print(item[1])
+        print(item[1])"""
     return extracted_data
 
-
-
-def extract_data(folder_path,section_headings):
-
-
-    # List to store data
-    data = []
-
-    # Loop through PDF files
-    for filename in os.listdir(folder_path):
-        print(filename)
-        filepath = os.path.join(folder_path, filename)
-        print(filepath)
-        if os.path.isfile(filepath):
-            # Check file extension
-            if filename.lower().endswith('.pdf'):
-                text=extract_text_from_pdf(filepath)
-            elif filename.lower().endswith('.docx'):
-                text=extract_text_from_docx(filepath)
-            elif filename.lower().endswith('.doc'):
-                text=extract_text_from_doc(filepath)
-            else:
-                text=""
-        else:
-            text = ""
-
-
-        # Extract each section dynamically based on section headings
-        sections = {}
-        for section_heading in section_headings:
-            section_text = extract_section(text, section_heading)
-            sections[section_heading] = section_text
-
-        # Append extracted sections to data list
-        data.append({'Filename': filename, **sections})
-
-    return data
 
 
 def excel_writer(data):
@@ -247,7 +233,7 @@ def excel_writer(data):
         worksheet = workbook.add_worksheet()
         col = 0
         for index,item in enumerate(CV):
-            if index == 0:
+            if index == 3:
 
                 worksheet.write(0, col, f"Introduction")
                 worksheet.write(1, col, f"{item[0]} {item[1]}")
@@ -261,8 +247,9 @@ def excel_writer(data):
     workbook.close()
     return 1
 
+
 if __name__=="__main__":
-    text=extract_text_from_pdf("extracted/Sample2/AarushiRohatgi.pdf")
+    text=extract_text_from_pdf("extracted/Sample2/CAChamanKumar.pdf")
     #text=extract_text_from_docx("extracted/Sample2/heemSen.docx")
 
     section_extractor(text=text)
