@@ -229,11 +229,41 @@ def excel_writer(data):
                 worksheet.write(1, col, f"{item[1]}")
                 col += 1
 
+        worksheet.write(3,0,"Kindly")
+        worksheet.write(3,1,"double")
+        worksheet.write(3,2,"click")
+        worksheet.write(3,3,"on")
+        worksheet.write(3,4,"the")
+        worksheet.write(3,5,"cells")
+        worksheet.write(3,6,"to")
+        worksheet.write(3,7,"view")
+        worksheet.write(3,8,"its")
+        worksheet.write(3,9,"entire")
+        worksheet.write(3,10,"content")
+
+
+
+
 
     workbook.close()
     return 1
 
 
+def clear_directory(directory):
+    # Iterate over all the files and subdirectories in the specified directory
+    for file_or_dir in os.listdir(directory):
+        # Construct the full path of the file or subdirectory
+        full_path = os.path.join(directory, file_or_dir)
+
+        # Check if it's a file
+        if os.path.isfile(full_path):
+            # If it's a file, remove it
+            os.remove(full_path)
+        elif os.path.isdir(full_path):
+            # If it's a directory, clear its contents recursively
+            clear_directory(full_path)
+            # After clearing the subdirectory, remove it
+            os.rmdir(full_path)
 if __name__=="__main__":
     text=extract_text_from_pdf("extracted/Sample2/CAChamanKumar.pdf")
     #text=extract_text_from_docx("extracted/Sample2/heemSen.docx")
